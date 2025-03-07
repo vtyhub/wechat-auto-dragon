@@ -47,6 +47,7 @@ class WechatAutoDragon:
                     print(f"按钮 {idx}: {btn.window_text()}")
                 if len(buttons) == 2:  # 确保有足够多的按钮
                     button = buttons[0]  # 根据索引选择正确的按钮
+                    button.set_focus()
                     button.click_input()
                     time.sleep(random.uniform(window_time-random_window_time, window_time+random_window_time))  # 等待弹窗加载
 

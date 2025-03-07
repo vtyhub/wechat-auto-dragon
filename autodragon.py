@@ -5,7 +5,7 @@ import time
 import random
 
 
-# 窗口标题，根据实际情况修改
+# 窗口默认标题
 window_title = "测试"
 # 轮询间隔时间，单位为秒
 refresh = 2
@@ -15,7 +15,7 @@ random_refresh = 0.8
 window_time = 0.5
 # 随机窗口时间
 random_window_time = 0.1
-# 接龙内容
+# 默认接龙内容
 content = "测试"
 
 
@@ -45,7 +45,7 @@ class WechatAutoDragon:
                 print("找到的按钮列表：")
                 for idx, btn in enumerate(buttons):
                     print(f"按钮 {idx}: {btn.window_text()}")
-                if len(buttons) == 2:  # 确保有足够多的按钮
+                if len(buttons) >= 2:  # 确保有足够多的按钮
                     button = buttons[0]  # 根据索引选择正确的按钮
                     button.set_focus()
                     button.click_input()

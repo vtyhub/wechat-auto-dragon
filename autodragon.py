@@ -6,9 +6,9 @@ import random
 
 
 # 窗口标题，根据实际情况修改
-window_title = "脚本测试"
+window_title = "测试"
 # 轮询间隔时间，单位为秒
-refresh = 2.5
+refresh = 2
 # 轮询时间随机值
 random_refresh = 0.8
 # 窗口时间
@@ -20,11 +20,13 @@ content = "测试"
 
 
 class WechatAutoDragon:
-    def __init__(self):
-        self.app = Application(backend='uia').connect(title_re=window_title )
-        self.window = self.app.window(title_re=window_title )
+    def __init__(self, title):
+        self.title = title
+        self.app = Application(backend='uia').connect(title_re=self.title )
+        self.window = self.app.window(title_re=self.title )
         self.last_message = ""
         self.content = ""
+        
 
     def monitor_messages(self):
         """监控聊天窗口新消息"""
@@ -105,6 +107,6 @@ class WechatAutoDragon:
             
 
 if __name__ == "__main__":
-    auto_dragon = WechatAutoDragon()
+    auto_dragon = WechatAutoDragon(window_title)
     auto_dragon.run(content)
     

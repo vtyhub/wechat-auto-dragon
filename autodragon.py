@@ -10,7 +10,7 @@ window_title = "测试"
 # 轮询间隔时间，单位为秒
 refresh = 2
 # 轮询时间随机值
-random_refresh = 0.8
+random_refresh = 1
 # 窗口时间
 window_time = 0.5
 # 随机窗口时间
@@ -20,12 +20,13 @@ content = "测试"
 
 
 class WechatAutoDragon:
-    def __init__(self, title):
+    def __init__(self, title, log_out=True):
         self.title = title
         self.app = Application(backend='uia').connect(title_re=self.title )
         self.window = self.app.window(title_re=self.title )
         self.last_message = ""
         self.content = ""
+        self.log_out = log_out
         
 
     def monitor_messages(self):
@@ -35,26 +36,8 @@ class WechatAutoDragon:
 
         
         if messages:
-            latest_msg_item = messages[-1]
-            latest_msg = latest_msg_item.window_text()
-            
-             # 精确查找最后一条消息中的按钮
-            try:
-                buttons = latest_msg_item.descendants(control_type="Button")
-                
-                print("找到的按钮列表：")
-                for idx, btn in enumerate(buttons):
-                    print(f"按钮 {idx}: {btn.window_text()}")
-                if len(buttons) >= 2:  # 确保有足够多的按钮
-                    button = buttons[0]  # 根据索引选择正确的按钮
-                    button.set_focus()
-                    button.click_input()
-                    time.sleep(random.uniform(window_time-random_window_time, window_time+random_window_time))  # 等待弹窗加载
-
-            except Exception as e:
-                print(f"点击按钮失败: {str(e)}")
-                
-            return latest_msg
+            latest_msg_item = messages[-1]            
+            return latest_msg_item
         return ""
 
     def is_dragon_message(self, msg):
@@ -83,6 +66,33 @@ class WechatAutoDragon:
     def get_user_name(self):
         """获取输入内容"""
         return self.content
+    
+    def click_button(self, item):
+        """点击指定标题的按钮"""
+        try:
+            buttons = item.descendants(control_type="Button")
+            target_button = None
+            
+            if self.log_out:
+                print("找到的按钮列表：")
+            for idx, btn in enumerate(buttons):
+                if self.log_out:
+                    print(f"按钮 {idx}: {btn.window_text()}")
+                if btn.window_text() == "":  # 指定需要点击的按钮标题
+                    target_button = btn
+                    break
+            if self.log_out:
+                print("\n")
+        
+            if target_button:
+                target_button.set_focus()
+                target_button.click_input()
+                time.sleep(random.uniform(window_time-random_window_time, window_time+random_window_time))
+            else:
+                print("未找到指定标题的按钮\n")
+        except Exception as e:
+            print(f"点击按钮失败: {str(e)}\n")
+                
         
     
     def run(self, content):
@@ -90,10 +100,21 @@ class WechatAutoDragon:
             self.content = content
             temp_random_time = random.uniform(refresh-random_refresh, refresh+random_refresh)
             try:
-                current_msg = self.monitor_messages()
+                last_msg_item = self.monitor_messages()
+                current_msg_list = last_msg_item.descendants(control_type='Text')
+                
+                if self.log_out:
+                    print("找到的文本列表：")
+                    for idx, msg in enumerate(current_msg_list):
+                        print(f"文本 {idx}: {msg.window_text()}")
+                    print("\n")
+                
+                current_msg = current_msg_list[0].window_text()
+
 
                 if current_msg and current_msg != self.last_message:
                     if self.is_dragon_message(current_msg):
+                        self.click_button(last_msg_item)
                         reply = self.generate_reply(current_msg)
                         self.send_message(reply)
                         print(f"已发送接龙：\n{reply}")
@@ -102,9 +123,9 @@ class WechatAutoDragon:
                 print(f"等待中...{temp_random_time:.2f}s")
                 time.sleep(temp_random_time)
             except Exception as e:
-                print(f"发生错误：{str(e)}")
+                print(f"发生错误：{str(e)}\n")
                 time.sleep(temp_random_time)
-        time.sleep(temp_random_time)
+        time.sleep(random.uniform(window_time-random_window_time, window_time+random_window_time))
             
 
 if __name__ == "__main__":

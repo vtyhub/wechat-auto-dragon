@@ -19,11 +19,13 @@ random_window_time = 0.1
 # 默认接龙内容
 content = "测试"
 # 连续检测到几条接龙时才会自动发送接龙信息
-dragon_state_repeat_time_maximum = 6
+dragon_state_repeat_time_maximum = 10
 # 当检测到接龙进入接龙状态后，每次检测接龙时的间隔(秒)
 dragon_state_retry_interval = 0.2
 # 发接龙消息的前延迟时间(秒)，未启用
 dragon_send_message_timeout = 0
+# 默认情况下接龙检测的间隔(秒)
+dragon_detection_interval = 2
 
 
 class WechatAutoDragon:
@@ -93,7 +95,7 @@ class WechatAutoDragon:
             if target_button:
                 target_button.set_focus()
                 target_button.click_input()
-                time.sleep(random.uniform(window_time - random_window_time, window_time + random_window_time))
+                # time.sleep(random.uniform(window_time - random_window_time, window_time + random_window_time))
             else:
                 print("未找到指定标题的按钮\n")
         except Exception as e:
@@ -140,12 +142,12 @@ class WechatAutoDragon:
                     else:
                         # 若未达到接龙循环重复上限时接龙信息被其他信息中断，则代表当前接龙可能已经完成，清空连续检测接龙数量重新检测
                         self.dragon_state_repeat_time = 0
-                print(f"等待中...{temp_random_time:.2f}s，当前时间：{formatted_current_time}\n")
-                time.sleep(temp_random_time)
+                print(f"最新一条信息为：\n{current_msg}\n当前时间：{formatted_current_time}\n")
+                time.sleep(dragon_detection_interval)
             except Exception as e:
                 print(f"发生错误：{str(e)}\n")
                 self.dragon_state_repeat_time = 0
-                time.sleep(temp_random_time)
+                time.sleep(dragon_detection_interval)
 
 
 if __name__ == "__main__":
